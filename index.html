@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>TypeRace — Free Typing Speed Test</title>
+<meta name="description" content="TypeRace is a free typing speed test that runs entirely in your browser. Pick a time limit, type quotes, code or pangrams, and see your live WPM, accuracy and errors — then share your result card." />
+<link rel="canonical" href="https://typerace.vercel.app/" />
+<meta name="theme-color" content="#0B0B0F" />
+<meta property="og:type" content="website" />
+<meta property="og:title" content="TypeRace — Free Typing Speed Test" />
+<meta property="og:description" content="How fast can you type? Timed tests, quotes and code, live WPM and accuracy, and a shareable result card — all in your browser." />
+<meta property="og:url" content="https://typerace.vercel.app/" />
+<meta name="twitter:card" content="summary_large_image" />
+<meta name="twitter:title" content="TypeRace — Free Typing Speed Test" />
+<meta name="twitter:description" content="How fast can you type? Timed tests, quotes and code, live WPM and accuracy, and a shareable result card — all in your browser." />
+<link rel="icon" type="image/svg+xml" href="favicon.svg" />
+<link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+<header class="topbar">
+  <div class="brand"><span class="brand-mark" aria-hidden="true">T</span> TypeRace</div>
+  <p class="tagline">How fast can you type? Find out in 15 seconds — no uploads, no account.</p>
+</header>
+
+<main class="wrap">
+  <section class="card" aria-labelledby="setup-heading">
+    <h1 id="setup-heading">Typing speed test</h1>
+    <p class="muted">Pick a time limit and a text type, then just start typing — the clock starts on your first keypress. Everything runs on your device.</p>
+
+    <div class="control-row">
+      <div class="control-group" role="group" aria-label="Time limit">
+        <span class="control-label">Time</span>
+        <div class="pill-row" id="mode-row">
+          <button type="button" class="pill mode-btn" data-mode="15">15s</button>
+          <button type="button" class="pill mode-btn" data-mode="30">30s</button>
+          <button type="button" class="pill mode-btn active" data-mode="60">60s</button>
+          <button type="button" class="pill mode-btn" data-mode="120">120s</button>
+        </div>
+      </div>
+      <div class="control-group" role="group" aria-label="Text type">
+        <span class="control-label">Text</span>
+        <div class="pill-row" id="category-row">
+          <button type="button" class="pill cat-btn active" data-category="quotes">Quotes</button>
+          <button type="button" class="pill cat-btn" data-category="code">Code</button>
+          <button type="button" class="pill cat-btn" data-category="pangrams">Pangrams &amp; fun</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="control-actions">
+      <button id="new-text-btn" type="button" class="btn">New text</button>
+      <button id="restart-btn" type="button" class="btn">Restart</button>
+      <span class="muted small hint">Shortcut: Tab or Enter restarts the test.</span>
+    </div>
+  </section>
+
+  <section class="card test-card" aria-label="Typing test">
+    <div class="live-stats" aria-live="polite">
+      <div class="live-stat"><span class="live-label">Time</span><span id="timer" class="live-value">60</span></div>
+      <div class="live-stat"><span class="live-label">WPM</span><span id="live-wpm" class="live-value">0</span></div>
+      <div class="live-stat"><span class="live-label">Accuracy</span><span id="live-acc" class="live-value">—</span></div>
+      <div class="live-stat"><span class="live-label">Raw WPM</span><span id="live-raw" class="live-value">0</span></div>
+      <div class="live-stat"><span class="live-label">Errors</span><span id="live-errors" class="live-value">0</span></div>
+    </div>
+
+    <div class="progress" aria-hidden="true"><div id="progress-fill" class="progress-fill"></div></div>
+    <p class="muted small"><span id="progress-label">0% complete</span> · <span id="word-count">0 words</span></p>
+
+    <div id="text-display" class="text-display" tabindex="0" aria-label="Text to type"></div>
+    <p id="focus-hint" class="muted small">Click the text above, then just start typing.</p>
+  </section>
+
+  <section id="results" class="card results-card" aria-labelledby="results-heading" hidden>
+    <h2 id="results-heading">Your result</h2>
+    <p id="result-best" class="best-badge" hidden>New personal best</p>
+    <p id="result-meta" class="muted">60s · Quotes</p>
+    <div class="result-hero">
+      <span id="result-wpm" class="result-wpm">0</span>
+      <span class="result-wpm-label">WPM</span>
+    </div>
+    <dl class="result-grid">
+      <div><dt>Accuracy</dt><dd id="result-acc">—</dd></div>
+      <div><dt>Consistency</dt><dd id="result-consistency">—</dd></div>
+      <div><dt>Raw WPM</dt><dd id="result-raw">—</dd></div>
+      <div><dt>Errors</dt><dd id="result-errors">—</dd></div>
+      <div><dt>Correct chars</dt><dd id="result-correct">—</dd></div>
+      <div><dt>Characters typed</dt><dd id="result-typed">—</dd></div>
+    </dl>
+    <canvas id="card-canvas" class="card-canvas" width="1200" height="630" aria-label="Shareable result card preview"></canvas>
+    <div class="control-actions">
+      <button id="download-btn" type="button" class="btn primary">Download result card (PNG)</button>
+      <button id="again-btn" type="button" class="btn">Try again</button>
+    </div>
+  </section>
+
+  <section class="card" aria-labelledby="bests-heading">
+    <h2 id="bests-heading">Personal bests</h2>
+    <p class="muted small">Saved only in this browser (localStorage). Clearing your browser data clears them.</p>
+    <ul id="bests-list" class="bests-list"></ul>
+    <p id="bests-empty" class="muted">No runs yet — finish a test and your best score for that time and text type shows up here.</p>
+  </section>
+
+  <section class="card" aria-labelledby="honest-heading">
+    <h2 id="honest-heading">How the numbers work</h2>
+    <ul class="honest-list">
+      <li><strong>WPM</strong> = (correct characters ÷ 5) ÷ minutes. A "word" is 5 characters, the standard typing-test definition — so only characters you typed correctly count towards your WPM.</li>
+      <li><strong>Raw WPM</strong> counts every character you typed, right or wrong. The gap between raw and real WPM is your typo rate.</li>
+      <li><strong>Accuracy</strong> is correct characters ÷ all characters typed. <strong>Consistency</strong> measures how steady your speed was second by second — a flat pace scores near 100%.</li>
+      <li>The test ends when the timer runs out or you finish the whole text, whichever comes first. Short texts in long modes just end early.</li>
+      <li>Your best scores never leave this browser. There is no account, no sync, and no leaderboard.</li>
+    </ul>
+  </section>
+</main>
+
+<footer class="footer">
+  <p>Built by krrish · <a href="https://github.com/codewithkrrish/typerace">GitHub</a> · <a href="https://www.instagram.com/krrishx.ai">Instagram</a></p>
+  <p class="muted small">Everything runs in your browser — your typing is never uploaded or stored anywhere.</p>
+</footer>
+
+<script type="module" src="js/main.js"></script>
+</body>
+</html>
