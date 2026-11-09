@@ -84,7 +84,7 @@ export function drawResultCard(canvas, r) {
   // Footer.
   ctx.fillStyle = MUTED;
   ctx.font = "400 24px Inter, system-ui, sans-serif";
-  ctx.fillText("typerace.vercel.app", 72, 580);
+  ctx.fillText("typerace-app.vercel.app", 72, 580);
   ctx.textAlign = "right";
   ctx.fillText("WPM = correct chars / 5 / minutes", CARD_WIDTH - 72, 580);
   ctx.textAlign = "left";
